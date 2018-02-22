@@ -20,8 +20,10 @@ public class ElevatorScene {
 	/*Semaphores in system*/
 	public static Semaphore elevatorWaitMutex;
 	public static Semaphore personCountMutex;
-	public static Semaphore semFloor1;
-	public static Semaphore semFloor2;
+	public static Semaphore elevatorChangeFloorMutex;
+	public static Semaphore elevatorPersonCountMutex;
+	public static Semaphore[] sourceFloors;
+	public static Semaphore[] destinationFloors;
 	
 	/*--------------------*/
 	
@@ -29,32 +31,30 @@ public class ElevatorScene {
 	
 	public static final int VISUALIZATION_WAIT_TIME = 500;  //milliseconds
 
-	private int numberOfFloors;
+	public int numberOfFloors;
 	public static int numberOfPeopleInElevator; // TODO: This will probably be an indexed array
 	private int numberOfElevators;
 	private Elevator elevatorRunning;
 	
 	private Thread elevatorThread = null;
 
-	ArrayList<Integer> personCount; //use if you want but
-									//throw away and
-									//implement differently
-									//if it suits you
+	ArrayList<Integer> personCount; 
 	ArrayList<Integer> exitedCount = null;
 	public static Semaphore exitedCountMutex;
 
 	//Base function: definition must not change
 	//Necessary to add your code in this one
 	public void restartScene(int numberOfFloors, int numberOfElevators) {
-		
+		this.setNumberOfFloors(numberOfFloors);
 		elevatorsCanStop = true;
 		numberOfPeopleInElevator = 0;
+	
 		
-		if(elevatorThread != null) {
-			if(elevatorThread.isAlive()) {
+		if(this.elevatorThread != null) {
+			if(this.elevatorThread.isAlive()) {
 				
 				try {
-					elevatorThread.join();	// for loop when there are many elevators
+					this.elevatorThread.join();	// for loop when there are many elevators
 				} catch (InterruptedException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
@@ -63,12 +63,19 @@ public class ElevatorScene {
 		}
 		
 		elevatorsCanStop = false;
-		
 		scene = this;
-		semFloor1 = new Semaphore(0);	// The parameter is simply the initial semaphore count, if count > 0 then a thread is granted access
-		semFloor2 = new Semaphore(0);
+		
+		sourceFloors = new Semaphore[this.getNumberOfFloors()];
+		destinationFloors = new Semaphore[this.getNumberOfFloors()];
+		for (int i = 0; i < this.getNumberOfFloors(); i++) {
+			sourceFloors[i] = new Semaphore(0);			// Semaphore for each incoming floor in system
+			destinationFloors[i] = new Semaphore(0);	// Semaphore for each destination floor in system	
+		}
+		
 		personCountMutex = new Semaphore(1);	
 		elevatorWaitMutex = new Semaphore(1);
+		elevatorPersonCountMutex = new Semaphore(1);
+		elevatorChangeFloorMutex = new Semaphore(1);
 		
 		elevatorRunning = new Elevator();
 		elevatorThread = new Thread(elevatorRunning);	
@@ -108,7 +115,6 @@ public class ElevatorScene {
 	//Base function: definition must not change
 	//Necessary to add your code in this one
 	public Thread addPerson(int sourceFloor, int destinationFloor) {
-		
 		Thread thread = new Thread(new Person(sourceFloor, destinationFloor));
 		thread.start();
 
@@ -145,9 +151,7 @@ public class ElevatorScene {
 	public void decrementNumberOfPeopleWaitingAtFloor(int floor) {
 		try {
 			personCountMutex.acquire();
-			/*Critical section*/
 			personCount.set(floor, (personCount.get(floor) - 1));
-			
 			personCountMutex.release();
 		} catch (InterruptedException e) {
 			// TODO Auto-generated catch block
@@ -159,9 +163,7 @@ public class ElevatorScene {
 	public void incrementNumberOfPeopleWaitingAtFloor(int floor) {
 		try {
 			personCountMutex.acquire();
-			/*Critical section*/
 			personCount.set(floor, (personCount.get(floor) + 1));
-			
 			personCountMutex.release();
 		} catch (InterruptedException e) {
 			// TODO Auto-generated catch block
@@ -170,11 +172,25 @@ public class ElevatorScene {
 	}
 	
 	public void decrementNumberOfPeopleInElevator(int elevator) {
-		numberOfPeopleInElevator--;
+		try {
+			elevatorPersonCountMutex.acquire();
+			numberOfPeopleInElevator--;
+			elevatorPersonCountMutex.release();
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 	
 	public void incrementNumberOfPeopleInElevator(int elevator) {
-		numberOfPeopleInElevator++;
+		try {
+			elevatorPersonCountMutex.acquire();
+			numberOfPeopleInElevator++;
+			elevatorPersonCountMutex.release();
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 
 	//Base function: definition must not change, but add your code if needed

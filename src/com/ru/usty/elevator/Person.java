@@ -14,35 +14,31 @@ public class Person implements Runnable {
 	@Override
 	public void run() {
 		try {
-			//ElevatorScene.elevatorWaitMutex.acquire();	// Elevator needs to have mutual exclusion for this		
-			//ElevatorScene.elevatorWaitMutex.release();
-			System.out.println("Waiting");
-			ElevatorScene.semFloor1.acquire();	// Wait	
+			ElevatorScene.sourceFloors[this.srcFloor].acquire();	// Wait at incoming floor semaphore
 			
 		} catch (InterruptedException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		
-		System.out.println("Released");
 	
 		ElevatorScene.scene.decrementNumberOfPeopleWaitingAtFloor(this.srcFloor);
 		ElevatorScene.scene.incrementNumberOfPeopleInElevator(1);
 		
 		try {
-			ElevatorScene.semFloor2.acquire();	// Person now waiting to arrive at second floor
+			ElevatorScene.destinationFloors[this.dstFloor].acquire();	// Person waits at destination semaphore 
 		} catch (InterruptedException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		
-		System.out.println("Im out!!");
-		
-		
-		
-		
-		
+		ElevatorScene.scene.decrementNumberOfPeopleInElevator(1);
+		ElevatorScene.scene.personExitsAtFloor(this.dstFloor);
+	
+
 	}
+	
+
 	
 
 }
