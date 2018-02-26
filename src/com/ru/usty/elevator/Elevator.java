@@ -26,7 +26,6 @@ public class Elevator implements Runnable {
 	}
 	
 	private void elevatorLetsPeopleInOnFloor() {
-		System.out.println("Letting people in at floor " + this.currentFloor);
 		sleepElevatorThread();
 		
 		int vacantSlots = 6 - ElevatorScene.scene.getNumberOfPeopleInElevator(1);
@@ -90,9 +89,6 @@ public class Elevator implements Runnable {
 		}
 		
 		sleepElevatorThread();
-		
-		
-		
 		
 		// Fixing semaphore at floor before leaving
 		int offset = ElevatorScene.scene.getNumberOfPeopleInElevator(1);

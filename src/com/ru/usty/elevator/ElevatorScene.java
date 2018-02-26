@@ -45,6 +45,17 @@ public class ElevatorScene {
 	//Base function: definition must not change
 	//Necessary to add your code in this one
 	public void restartScene(int numberOfFloors, int numberOfElevators) {
+		/**
+		 * Important to add code here to make new
+		 * threads that run your elevator-runnables
+		 * 
+		 * Also add any other code that initializes
+		 * your system for a new run
+		 * 
+		 * If you can, tell any currently running
+		 * elevator threads to stop
+		 */
+		
 		this.setNumberOfFloors(numberOfFloors);
 		elevatorsCanStop = true;
 		numberOfPeopleInElevator = 0;
@@ -81,17 +92,6 @@ public class ElevatorScene {
 		elevatorThread = new Thread(elevatorRunning);	
 		elevatorThread.start();
 
-		/**
-		 * Important to add code here to make new
-		 * threads that run your elevator-runnables
-		 * 
-		 * Also add any other code that initializes
-		 * your system for a new run
-		 * 
-		 * If you can, tell any currently running
-		 * elevator threads to stop
-		 */
-
 		this.numberOfFloors = numberOfFloors;
 		this.numberOfElevators = numberOfElevators;
 
@@ -115,9 +115,6 @@ public class ElevatorScene {
 	//Base function: definition must not change
 	//Necessary to add your code in this one
 	public Thread addPerson(int sourceFloor, int destinationFloor) {
-		Thread thread = new Thread(new Person(sourceFloor, destinationFloor));
-		thread.start();
-
 		/**
 		 * Important to add code here to make a
 		 * new thread that runs your person-runnable
@@ -126,7 +123,8 @@ public class ElevatorScene {
 		 * so that it can be reaped in the testSuite
 		 * (you don't have to join() yourself)
 		 */
-
+		Thread thread = new Thread(new Person(sourceFloor, destinationFloor));
+		thread.start();
 		incrementNumberOfPeopleWaitingAtFloor(sourceFloor);
 		
 		return thread;  // The base system will take care of waiting for all person threads to finish
