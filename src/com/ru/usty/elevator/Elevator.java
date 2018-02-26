@@ -4,6 +4,11 @@ public class Elevator implements Runnable {
 
 	public int currentFloor = 0;	// Starting floor is 0
 	public boolean elevatorGoingUp;	// Elevator starts by going up
+	public int elevatorId;
+	
+	public Elevator(int numberOfElevator) {
+		this.elevatorId = numberOfElevator;
+	}
 	
 	//public static boolean elevetorIsInCriticalSection = false;
 	
@@ -26,16 +31,19 @@ public class Elevator implements Runnable {
 	}
 	
 	private void elevatorLetsPeopleInOnFloor() {
+		System.out.println("Elevator " + this.elevatorId + " letting in on floor " + this.currentFloor);
 		sleepElevatorThread();
 		
-		int vacantSlots = 6 - ElevatorScene.scene.getNumberOfPeopleInElevator(1);
+		int vacantSlots = 6 - ElevatorScene.scene.getNumberOfPeopleInElevator(this.elevatorId);
+		ElevatorScene.scene.setAvailableElevatorAtFloor(this.elevatorId, this.currentFloor);
 		for (int i = 0; i < vacantSlots; i++) {
-			ElevatorScene.sourceFloors[this.currentFloor].release();	// Let persons into elevator waiting at current floor
+			ElevatorScene.sourceFloors[this.currentFloor].release();	// Open up floor for person threads
 		}
 		
 		sleepElevatorThread();
+		ElevatorScene.elevatorAvailableAtFloorMutex.release();
 		
-		int offset = 6 - ElevatorScene.scene.getNumberOfPeopleInElevator(1);
+		int offset = 6 - ElevatorScene.scene.getNumberOfPeopleInElevator(this.elevatorId);
 		for (int i = 0; i < offset; i++) {
 			try {
 				ElevatorScene.sourceFloors[this.currentFloor].acquire();	// Fixing semaphore at floor before leaving
@@ -46,10 +54,10 @@ public class Elevator implements Runnable {
 		}
 		sleepElevatorThread();
 		
-
 	}
 	
 	private void changeFloor() {
+		
 		try {
 			ElevatorScene.elevatorChangeFloorMutex.acquire();
 			
@@ -81,20 +89,19 @@ public class Elevator implements Runnable {
 	}
 	
 	private void letPeopleOutAtFloor() {
-		System.out.println("Letting people out at floor " + this.currentFloor);
+		System.out.println("Elevator " + this.elevatorId + " with " + ElevatorScene.scene.getNumberOfPeopleInElevator(this.elevatorId) + "people letting out at floor " + this.currentFloor);
 		sleepElevatorThread();
-		int peopleInElevator = ElevatorScene.scene.getNumberOfPeopleInElevator(1);
+		int peopleInElevator = ElevatorScene.scene.getNumberOfPeopleInElevator(this.elevatorId);
 		for (int i = 0; i < peopleInElevator; i++) {
-			ElevatorScene.destinationFloors[this.currentFloor].release();	
+			ElevatorScene.destinationFloors[this.currentFloor][this.elevatorId].release();	
 		}
-		
 		sleepElevatorThread();
 		
 		// Fixing semaphore at floor before leaving
-		int offset = ElevatorScene.scene.getNumberOfPeopleInElevator(1);
+		int offset = ElevatorScene.scene.getNumberOfPeopleInElevator(this.elevatorId);
 		for (int i = 0; i < offset; i++) {
 			try {
-				ElevatorScene.destinationFloors[this.currentFloor].acquire();
+				ElevatorScene.destinationFloors[this.currentFloor][this.elevatorId].acquire();
 			} catch (InterruptedException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
