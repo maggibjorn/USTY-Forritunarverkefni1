@@ -23,7 +23,7 @@ public class Person implements Runnable {
 		}
 		
 		
-		System.out.println("Person going into elevator " + ElevatorScene.scene.getAvailableElevatorAtFloor(this.srcFloor));
+		//System.out.println("Person going into elevator " + ElevatorScene.scene.getAvailableElevatorAtFloor(this.srcFloor));
 		this.personCurrentElevator = ElevatorScene.scene.getAvailableElevatorAtFloor(this.srcFloor);
 		ElevatorScene.scene.decrementNumberOfPeopleWaitingAtFloor(this.srcFloor);
 		ElevatorScene.scene.incrementNumberOfPeopleInElevator(this.personCurrentElevator); 	// Increment available elevator
