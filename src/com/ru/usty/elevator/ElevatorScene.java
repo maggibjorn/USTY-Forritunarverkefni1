@@ -268,14 +268,12 @@ public class ElevatorScene {
 	}
 	
 	public int getAvailableElevatorAtFloor(int floor) {
-		System.out.println("Elevator " + this.elevatorIdAvailableAtFloor[floor] + " available at floor " + floor);
 		return this.elevatorIdAvailableAtFloor[floor];
 	}
 	
 	public void setAvailableElevatorAtFloor(int elevatorId, int floor) {
 		try {
 			elevatorAvailableAtFloorMutex.acquire();
-			System.out.println("Setting elevator " + elevatorId + " as available at floor " + floor);
 			this.elevatorIdAvailableAtFloor[floor] = elevatorId;
 		} catch (InterruptedException e) {
 			// TODO Auto-generated catch block

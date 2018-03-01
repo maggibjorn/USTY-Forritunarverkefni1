@@ -10,8 +10,6 @@ public class Elevator implements Runnable {
 		this.elevatorId = numberOfElevator;
 	}
 	
-	//public static boolean elevetorIsInCriticalSection = false;
-	
 	
 	@Override
 	public void run() {
@@ -24,14 +22,11 @@ public class Elevator implements Runnable {
 			this.letPeopleOutAtFloor();
 			this.elevatorLetsPeopleInOnFloor();
 			this.changeFloor();
-			
-		
 		}
 		
 	}
 	
-	private void elevatorLetsPeopleInOnFloor() {
-		//System.out.println("Elevator " + this.elevatorId + " letting in on floor " + this.currentFloor);	
+	private void elevatorLetsPeopleInOnFloor() {	
 		int vacantSlots = 6 - ElevatorScene.scene.getNumberOfPeopleInElevator(this.elevatorId);
 		ElevatorScene.scene.setAvailableElevatorAtFloor(this.elevatorId, this.currentFloor);
 		for (int i = 0; i < vacantSlots; i++) {
@@ -87,7 +82,6 @@ public class Elevator implements Runnable {
 	}
 	
 	private void letPeopleOutAtFloor() {
-		//System.out.println("Elevator " + this.elevatorId + " with " + ElevatorScene.scene.getNumberOfPeopleInElevator(this.elevatorId) + "people letting out at floor " + this.currentFloor);
 		int peopleInElevator = ElevatorScene.scene.getNumberOfPeopleInElevator(this.elevatorId);
 		for (int i = 0; i < peopleInElevator; i++) {
 			ElevatorScene.destinationFloors[this.currentFloor][this.elevatorId].release();	
